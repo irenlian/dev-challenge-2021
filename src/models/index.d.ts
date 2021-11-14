@@ -1,7 +1,7 @@
 declare namespace Models {
     export type Nullable<T> = null | T;
 
-    export interface Paper {
+    export interface Sheet {
         w: number;
         l: number;
     }
