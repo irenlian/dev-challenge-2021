@@ -12,4 +12,4 @@ app.use(body());
 app.use(errorHandling);
 routes(app);
 
-app.listen(PORT);
+export default app;

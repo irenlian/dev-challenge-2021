@@ -1,5 +1,5 @@
 import Koa from 'koa';
-import CNC from '../lib/boxCutting';
+import CNC from '../lib/cnc';
 
 export const simpleBoxController = async (ctx: Koa.Context) => {
     let sheet = (ctx.request.body as any).sheetSize as Models.Sheet;
