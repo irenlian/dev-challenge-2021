@@ -28,11 +28,6 @@ const validateObject = (
  * Generate a Koa middleware function to validate a request using
  * the provided validation objects.
  *
- * @param {Object} validationObj
- * @param {Object} validationObj.headers The request headers schema
- * @param {Object} validationObj.params The request params schema
- * @param {Object} validationObj.query The request query schema
- * @param {Object} validationObj.body The request body schema
  * @returns A validation middleware function.
  */
 const validate = (schema: Models.Validate.ValidateSchema = {}): Koa.Middleware => async (
@@ -48,7 +43,10 @@ const validate = (schema: Models.Validate.ValidateSchema = {}): Koa.Middleware =
             validateObject(ctx.request.body, 'Request Body', schema.body);
         }
     } catch (err) {
-        ctx.throw(400, err.message);
+        ctx.throw(422, JSON.stringify({
+            success: false,
+            error: err.message
+        }));
     }
 
     await next();
