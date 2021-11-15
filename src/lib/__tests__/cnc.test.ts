@@ -11,6 +11,83 @@ describe('CNC', () => {
         });
     });
 
+    describe('convertToCommands', () => {
+        it('returns start and end commands', () => {
+            const cnc = new CNC({ w: 1500, l: 1000 }, { w: 200, d: 200, h: 200 });
+            const result = cnc.convertToCommands(cnc.combineBoxes());
+            expect(result.filter(c => c.command === 'START')).toHaveLength(1);
+            expect(result.filter(c => c.command === 'STOP')).toHaveLength(1);
+            expect(result.filter(c => c.command === 'DOWN')).toHaveLength(1);
+        });
+
+        it('includes x and y only for GOTO', () => {
+            const cnc = new CNC({ w: 1500, l: 1000 }, { w: 200, d: 200, h: 200 });
+            const result = cnc.convertToCommands(cnc.combineBoxes());
+            expect(result.find(c => c.command !== 'GOTO' && (c.x || c.y))).not.toBeDefined();
+        });
+    });
+
+    describe('bestLocatedBoxes', () => {
+        it('check the smallest input', () => {
+            const cnc = new CNC({ w: 600, l: 400 }, { w: 100, d: 100, h: 100 });
+            const result = cnc.bestLocatedBoxes();
+            expect(result).toEqual([
+                [
+                    { x: 100, y: 100 },
+                    { x: 0, y: 100 },
+                    { x: 0, y: 200 },
+                    { x: 100, y: 200 },
+                    { x: 100, y: 300 },
+                    { x: 200, y: 300 },
+                    { x: 200, y: 200 },
+                    { x: 400, y: 200 },
+                    { x: 400, y: 100 },
+                    { x: 200, y: 100 },
+                    { x: 200, y: 0 },
+                    { x: 100, y: 0 },
+                    { x: 100, y: 100 },
+                ],
+            ]);
+        });
+
+        it('check for two boxes', () => {
+            const cnc = new CNC({ w: 500, l: 500 }, { w: 100, d: 100, h: 100 });
+            const result = cnc.bestLocatedBoxes();
+            expect(result).toEqual([
+                [
+                    { x: 100, y: 100 },
+                    { x: 0, y: 100 },
+                    { x: 0, y: 200 },
+                    { x: 100, y: 200 },
+                    { x: 100, y: 300 },
+                    { x: 200, y: 300 },
+                    { x: 200, y: 200 },
+                    { x: 400, y: 200 },
+                    { x: 400, y: 100 },
+                    { x: 200, y: 100 },
+                    { x: 200, y: 0 },
+                    { x: 100, y: 0 },
+                    { x: 100, y: 100 }
+                ],
+                [
+                    { x: 200, y: 300 },
+                    { x: 100, y: 300 },
+                    { x: 100, y: 400 },
+                    { x: 200, y: 400 },
+                    { x: 200, y: 500 },
+                    { x: 300, y: 500 },
+                    { x: 300, y: 400 },
+                    { x: 500, y: 400 },
+                    { x: 500, y: 300 },
+                    { x: 300, y: 300 },
+                    { x: 300, y: 200 },
+                    { x: 200, y: 200 },
+                    { x: 200, y: 300 }
+                ]
+            ]);
+        });
+    });
+
     describe('minimum waste', () => {
         it('calculate average waste', () => {
             const res = Array.from(Array(100).keys(), key => {

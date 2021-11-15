@@ -4,6 +4,8 @@ import Sheet = Models.Sheet;
 import BoxSize = Models.BoxSize;
 import Location = Models.Location;
 import Command = Models.Command;
+import { FORMS } from './form';
+import { isBoxOverlapped } from './box';
 
 export default class CNC {
     sheet: Sheet;
@@ -44,6 +46,30 @@ export default class CNC {
         return this.points;
     };
 
+    // Backtracking algorithm to determine the better combination of boxes
+    bestLocatedBoxes = (locatedBoxes = [] as Location[][]): Location[][] => {
+        let bestLocation: Location[][] = [];
+        // const form = FORMS[0];
+        const smallestStep = Math.min(this.box.d, this.box.h, this.box.w);
+        for (const form of FORMS) {
+            for (let i = 0; i <= this.sheet.w - this.boxLength; i += smallestStep) {
+                for (let j = 0; j <= this.sheet.l - this.boxHeight; j += smallestStep) {
+                    // check the new location for box
+                    const point = { x: i, y: j };
+                    const box = form(this.box, point);
+                    // check if it not overlaps with previous boxes
+                    if (!isBoxOverlapped(locatedBoxes, box)) {
+                        // calculate how many boxes can we put later
+                        const result = this.bestLocatedBoxes([...locatedBoxes, box]);
+                        // if more boxes fits, so select this solution
+                        if (result.length + 1 > bestLocation.length) bestLocation = [box, ...result];
+                    }
+                }
+            }
+        }
+        return bestLocation;
+    }
+
     convertToCommands = (points: Location[]): Command[] => {
         const commands: Command[] = [{ command: CommandType.START }];
 
@@ -58,7 +84,7 @@ export default class CNC {
         return commands;
     };
 
-    convertOnePointToCommand = ({ x, y }: Location): Command[] => {
+    private convertOnePointToCommand = ({ x, y }: Location): Command[] => {
         const COMMAND = { command: CommandType.GOTO };
         const currentPoint: Location = { x, y: y + this.box.h };
         const commands: Command[] = [
