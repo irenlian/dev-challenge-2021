@@ -27,7 +27,7 @@ describe('CNC', () => {
         });
     });
 
-    describe('bestLocatedBoxes', () => {
+    describe.skip('bestLocatedBoxes', () => {
         it('check the smallest input', () => {
             const cnc = new CNC({ w: 600, l: 400 }, { w: 100, d: 100, h: 100 });
             const result = cnc.bestLocatedBoxes();

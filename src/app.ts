@@ -1,8 +1,6 @@
 import Koa from 'koa';
 import body from 'koa-bodyparser';
 
-import { PORT } from './config';
-
 import errorHandling from './middleware/errorHandling';
 import routes from './routes';
 
