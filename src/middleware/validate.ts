@@ -45,7 +45,7 @@ const validate = (schema: Models.Validate.ValidateSchema = {}): Koa.Middleware =
     } catch (err) {
         ctx.throw(422, JSON.stringify({
             success: false,
-            error: err.message
+            error: 'Invalid input format. Please use only positive integers'
         }));
     }
 

@@ -29,7 +29,7 @@ describe('Box Endpoints', () => {
             expect(res.body).toHaveProperty('success');
             expect(res.body.success).toEqual(false);
             expect(res.body).toHaveProperty('error');
-            expect(res.body.error).toEqual(`Invalid Request Body - "sheetSize" is required`);
+            expect(res.body.error).toEqual('Invalid input format. Please use only positive integers');
         });
 
         it('returns an error if there is no sheet data', async () => {
@@ -44,7 +44,7 @@ describe('Box Endpoints', () => {
             expect(res.body).toHaveProperty('success');
             expect(res.body.success).toEqual(false);
             expect(res.body).toHaveProperty('error');
-            expect(res.body.error).toEqual(`Invalid Request Body - "sheetSize" is required`);
+            expect(res.body.error).toEqual('Invalid input format. Please use only positive integers');
         });
 
         it('returns an error if there is no box data', async () => {
@@ -58,7 +58,7 @@ describe('Box Endpoints', () => {
             expect(res.body).toHaveProperty('success');
             expect(res.body.success).toEqual(false);
             expect(res.body).toHaveProperty('error');
-            expect(res.body.error).toEqual(`Invalid Request Body - "boxSize" is required`);
+            expect(res.body.error).toEqual('Invalid input format. Please use only positive integers');
         });
 
         it('returns an error if there is no parameter inside dimensions', async () => {
@@ -76,7 +76,7 @@ describe('Box Endpoints', () => {
             expect(res.body).toHaveProperty('success');
             expect(res.body.success).toEqual(false);
             expect(res.body).toHaveProperty('error');
-            expect(res.body.error).toEqual(`Invalid Request Body - "boxSize.h" is required`);
+            expect(res.body.error).toEqual('Invalid input format. Please use only positive integers');
         });
 
         it('returns an error if there is a wrong data type', async () => {
@@ -95,7 +95,7 @@ describe('Box Endpoints', () => {
             expect(res.body).toHaveProperty('success');
             expect(res.body.success).toEqual(false);
             expect(res.body).toHaveProperty('error');
-            expect(res.body.error).toEqual(`Invalid Request Body - "boxSize.h" must be a number`);
+            expect(res.body.error).toEqual('Invalid input format. Please use only positive integers');
         });
 
         it('returns an error if there is a negative number', async () => {
@@ -114,7 +114,7 @@ describe('Box Endpoints', () => {
             expect(res.body).toHaveProperty('success');
             expect(res.body.success).toEqual(false);
             expect(res.body).toHaveProperty('error');
-            expect(res.body.error).toEqual(`Invalid Request Body - "boxSize.h" must be a positive number`);
+            expect(res.body.error).toEqual('Invalid input format. Please use only positive integers');
         });
 
         it('returns an error if there is a floating number', async () => {
@@ -133,7 +133,7 @@ describe('Box Endpoints', () => {
             expect(res.body).toHaveProperty('success');
             expect(res.body.success).toEqual(false);
             expect(res.body).toHaveProperty('error');
-            expect(res.body.error).toEqual(`Invalid Request Body - "boxSize.h" must be an integer`);
+            expect(res.body.error).toEqual('Invalid input format. Please use only positive integers');
         });
 
         it('returns an error if there is no enough place for a box', async () => {

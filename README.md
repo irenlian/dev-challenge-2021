@@ -16,6 +16,7 @@ docker-compose up
 
 To start the service locally:
 ```
+npm ci
 npm run dev
 ```
 
