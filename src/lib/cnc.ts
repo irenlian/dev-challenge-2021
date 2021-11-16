@@ -5,7 +5,7 @@ import BoxSize = Models.BoxSize;
 import Location = Models.Location;
 import Command = Models.Command;
 import { FORMS } from './form';
-import { isBoxOverlapped } from './box';
+import { isBoxOverlapped } from '../utils';
 
 export default class CNC {
     sheet: Sheet;
