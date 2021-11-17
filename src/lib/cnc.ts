@@ -5,15 +5,22 @@ import Sheet = Models.Sheet;
 import BoxSize = Models.BoxSize;
 import Location = Models.Location;
 import Command = Models.Command;
-import { Form, FORMS } from './form';
+import {
+    Form,
+    FORMS,
+    getHorizontalLeftForm,
+    getHorizontalRightForm,
+    getVerticalBottomForm,
+    getVerticalTopForm,
+} from './form';
 import { isBoxOverlapped, push } from '../utils';
 
-type Memo = Record<number, Record<number, Record<number, Location[][]>>>
+type Memo = Record<number, Record<number, Record<number, Location[][]>>>;
 
 type Option = {
     locatedBoxes: Location[][];
     form: Form;
-}
+};
 
 export default class CNC {
     sheet: Sheet;
@@ -38,9 +45,7 @@ export default class CNC {
         const x = this.boxLength;
         const y = this.boxHeight;
         // Min sheet side should fit min box side and the same for the max
-        // TODO: Uncomment as soon as the algorithm is improved
-        // return Math.min(sheet.l, sheet.w) >= Math.min(x, y) && Math.max(sheet.l, sheet.w) >= Math.max(x, y);
-        return this.sheet.l >= y && this.sheet.w >= x;
+        return Math.min(this.sheet.l, this.sheet.w) >= Math.min(x, y) && Math.max(this.sheet.l, this.sheet.w) >= Math.max(x, y);
     };
 
     // Simple algorithm that uses a single form which stands one by one
@@ -62,7 +67,7 @@ export default class CNC {
         let bestLocation: Location[][] = [];
         const start = Date.now();
         const smallestStep = Math.min(this.box.d, this.box.h, this.box.w);
-        for (let k = 0; k < FORMS.length; k ++) {
+        for (let k = 0; k < FORMS.length; k++) {
             const form = FORMS[k];
             for (let i = startX; i <= this.sheet.w - this.boxLength; i += smallestStep) {
                 for (let j = startY; j <= this.sheet.l - this.boxHeight; j += smallestStep) {
@@ -86,7 +91,7 @@ export default class CNC {
             }
         }
         return bestLocation;
-    }
+    };
 
     // Backtracking iterative algorithm with just a single try to locate a specific form
     cutV3 = (): Location[][] => {
@@ -115,7 +120,51 @@ export default class CNC {
             if (locatedBoxes.length > bestLocation.length) bestLocation = locatedBoxes;
         }
         return bestLocation;
-    }
+    };
+
+    private stackingHorizontally = (): Location[][] => {
+        const x = this.boxLength;
+        const y = this.box.h + this.box.d;
+        const columns = Array.from(Array(Math.floor(this.sheet.w / x)).keys(), key => key * x);
+        const rows = Array.from(Array(Math.max(Math.floor((this.sheet.l - this.box.h) / y), 0)).keys(), key => key * y);
+        const locatedBoxes: Location[][] = [];
+        columns.forEach(col =>
+            rows.forEach((row, i) => {
+                const point = { x: col, y: row };
+                locatedBoxes.push(
+                    i % 2 === 0 ? getHorizontalLeftForm(this.box, point) : getHorizontalRightForm(this.box, point),
+                );
+            }),
+        );
+        return locatedBoxes;
+    };
+
+    private stackingVertically = (): Location[][] => {
+        const x = this.box.h + this.box.d;
+        const y = 2 * this.box.h + 2 * this.box.w;
+        const columns = Array.from(
+            Array(Math.max(Math.floor((this.sheet.w - this.box.h) / x), 0)).keys(),
+            key => key * x,
+        );
+        const rows = Array.from(Array(Math.floor(this.sheet.l / y)).keys(), key => key * y);
+        const locatedBoxes: Location[][] = [];
+        rows.forEach(row =>
+            columns.forEach((col, i) => {
+                const point = { x: col, y: row };
+                locatedBoxes.push(
+                    i % 2 === 0 ? getVerticalTopForm(this.box, point) : getVerticalBottomForm(this.box, point),
+                );
+            }),
+        );
+        return locatedBoxes;
+    };
+
+    // Simple algorithm that uses a single form which stands closer
+    cutV4 = (): Location[][] => {
+        const r1 = this.stackingHorizontally();
+        const r2 = this.stackingVertically();
+        return r1.length >= r2.length ? r1 : r2;
+    };
 
     convertToCommands = (points: Location[][]): Command[] => {
         const commands: Command[] = [{ command: CommandType.START }];
@@ -133,10 +182,7 @@ export default class CNC {
 
     private convertOnePointToCommand = (dots: Location[]): Command[] => {
         const COMMAND = { command: CommandType.GOTO };
-        const commands: Command[] = [
-            { ...COMMAND, ...dots[0] },
-            { command: CommandType.DOWN },
-        ];
+        const commands: Command[] = [{ ...COMMAND, ...dots[0] }, { command: CommandType.DOWN }];
 
         dots.forEach((d, i) => {
             if (i === 0) return;

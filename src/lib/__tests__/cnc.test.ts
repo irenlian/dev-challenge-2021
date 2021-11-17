@@ -27,10 +27,11 @@ describe('CNC', () => {
         });
     });
 
-    describe('bestLocatedBoxes', () => {
+    describe('Iterative V3', () => {
         it('check the smallest input', () => {
             const cnc = new CNC({ w: 600, l: 400 }, { w: 100, d: 100, h: 100 });
-            const result = cnc.cutV2();
+            const result = cnc.cutV3();
+            console.log(result);
             expect(result).toEqual([
                 [
                     { x: 100, y: 100 },
@@ -67,7 +68,7 @@ describe('CNC', () => {
 
         it('check for two boxes', () => {
             const cnc = new CNC({ w: 500, l: 500 }, { w: 100, d: 100, h: 100 });
-            const result = cnc.cutV2();
+            const result = cnc.cutV3();
             expect(result).toEqual([
                 [
                     { x: 100, y: 100 },
@@ -104,21 +105,126 @@ describe('CNC', () => {
 
         it('check', () => {
             const cnc = new CNC({ w: 36, l: 22 }, { w: 7, d: 2, h: 7 });
-            const result = cnc.cutV2(); // 1 box, waste 0.8
+            const result = cnc.cutV3(); // 1 box, waste 0.8
+            console.log(result);
+            expect(result).toHaveLength(1);
         });
+
         it('check', () => {
-            const cnc = new CNC({ w: 88, l: 47 }, { w: 7, d: 5, h: 8 });
-            const result = cnc.cutV2(); // 4 box, 0.74
+            const cnc = new CNC({ w: 50, l: 47 }, { w: 7, d: 5, h: 8 });
+            const result = cnc.cutV3(); // 4 box, 0.74
+            console.log(result);
+            expect(result).toHaveLength(4);
         });
     });
 
-    describe('minimum waste', () => {
+    describe('Stacking V4', () => {
+        it('check the smallest input', () => {
+            const cnc = new CNC({ w: 300, l: 400 }, { w: 100, d: 100, h: 100 });
+            const result = cnc.cutV4();
+            expect(result).toEqual([
+                [
+                    { x: 100, y: 300 },
+                    { x: 100, y: 400 },
+                    { x: 200, y: 400 },
+                    { x: 200, y: 300 },
+                    { x: 300, y: 300 },
+                    { x: 300, y: 200 },
+                    { x: 200, y: 200 },
+                    { x: 200, y: 0 },
+                    { x: 100, y: 0 },
+                    { x: 100, y: 200 },
+                    { x: 0, y: 200 },
+                    { x: 0, y: 300 }
+                ]
+            ]);
+        });
+
+        it('check for two boxes', () => {
+            const cnc = new CNC({ w: 500, l: 500 }, { w: 100, d: 100, h: 100 });
+            const result = cnc.cutV4();
+            expect(result).toEqual([
+                [
+                    { x: 100, y: 100 },
+                    { x: 0, y: 100 },
+                    { x: 0, y: 200 },
+                    { x: 100, y: 200 },
+                    { x: 100, y: 300 },
+                    { x: 200, y: 300 },
+                    { x: 200, y: 200 },
+                    { x: 400, y: 200 },
+                    { x: 400, y: 100 },
+                    { x: 200, y: 100 },
+                    { x: 200, y: 0 },
+                    { x: 100, y: 0 },
+                    { x: 100, y: 100 }
+                ],
+                [
+                    { x: 300, y: 300 },
+                    { x: 400, y: 300 },
+                    { x: 400, y: 400 },
+                    { x: 300, y: 400 },
+                    { x: 300, y: 500 },
+                    { x: 200, y: 500 },
+                    { x: 200, y: 400 },
+                    { x: 0, y: 400 },
+                    { x: 0, y: 300 },
+                    { x: 200, y: 300 },
+                    { x: 200, y: 200 },
+                    { x: 300, y: 200 },
+                    { x: 300, y: 300 }
+                ]
+            ]);
+        });
+
+        it('check for three boxes', () => {
+            const cnc = new CNC({ w: 21, l: 11 }, { w: 2, d: 4, h: 2 });
+            const result = cnc.cutV4();
+            expect(result).toHaveLength(3);
+            expect(result).toEqual([
+                [
+                    { x: 2, y: 6 }, { x: 2, y: 8 },
+                    { x: 6, y: 8 }, { x: 6, y: 6 },
+                    { x: 8, y: 6 }, { x: 8, y: 4 },
+                    { x: 6, y: 4 }, { x: 6, y: 0 },
+                    { x: 2, y: 0 }, { x: 2, y: 4 },
+                    { x: 0, y: 4 }, { x: 0, y: 6 }
+                ],
+                [
+                    { x: 12, y: 2 }, { x: 12, y: 0 },
+                    { x: 8, y: 0 },  { x: 8, y: 2 },
+                    { x: 6, y: 2 },  { x: 6, y: 4 },
+                    { x: 8, y: 4 },  { x: 8, y: 8 },
+                    { x: 12, y: 8 }, { x: 12, y: 4 },
+                    { x: 14, y: 4 }, { x: 14, y: 2 },
+                    { x: 12, y: 2 }
+                ],
+                [
+                    { x: 14, y: 6 },
+                    { x: 14, y: 8 },
+                    { x: 18, y: 8 },
+                    { x: 18, y: 6 },
+                    { x: 20, y: 6 },
+                    { x: 20, y: 4 },
+                    { x: 18, y: 4 },
+                    { x: 18, y: 0 },
+                    { x: 14, y: 0 },
+                    { x: 14, y: 4 },
+                    { x: 12, y: 4 },
+                    { x: 12, y: 6 }
+                ]
+            ]);
+        });
+    });
+
+    describe('Effectiveness comparison', () => {
         it('calculate average waste', () => {
             let combineBoxesSimpleWaste = [] as number[];
             let simpleWins = 0;
             let recursiveWins = 0;
             let iterativeWins = 0;
-            const res = Array.from(Array(50).keys(), key => {
+            let stackingWins = 0;
+            const res = Array.from(Array(10).keys(), key => {
                 const sheet = { w: Math.round(Math.random() * 100 + 2), l: Math.round(Math.random() * 100 + 2) };
                 const box = {
                     w: Math.round(Math.random() * 10 + 1),
@@ -129,7 +235,12 @@ describe('CNC', () => {
                 const sheetSquare = sheet.w * sheet.l;
                 const boxSquare = 2 * box.w * box.d + 2 * box.w * box.h + 2 * box.d * box.h;
                 const cnc = new CNC(sheet, box);
-                const boxes = [cnc.cutV1().length, cnc.cutV3().length, cnc.cutV2().length];
+                const boxes = [
+                    cnc.cutV1().length,
+                    cnc.cutV3().length,
+                    cnc.cutV2().length,
+                    cnc.cutV4().length
+                ];
                 const w1 = 1 - (boxSquare * boxes[1]) / sheetSquare;
                 const w2 = 1 - (boxSquare * boxes[0]) / sheetSquare;
                 console.log('waste:', w1, w2, 'boxes:', boxes, 'sheetSquare:', sheetSquare);
@@ -137,6 +248,7 @@ describe('CNC', () => {
                 if (boxes[0] === max) simpleWins++;
                 if (boxes[1] === max) iterativeWins++;
                 if (boxes[2] === max) recursiveWins++;
+                if (boxes[3] === max) stackingWins++;
                 if (boxes[0]) combineBoxesSimpleWaste.push(w2);
                 if (!boxes) return 0;
                 return w1;
@@ -146,12 +258,22 @@ describe('CNC', () => {
             const s2 = combineBoxesSimpleWaste.reduce((sum, i) => sum + i, 0);
 
             console.log(s1 / res.length, s2 / combineBoxesSimpleWaste.length);
-            console.log('simpleWins', simpleWins, 'iterativeWins', iterativeWins, 'recursiveWins', recursiveWins);
+            console.log(
+                'simpleWins',
+                simpleWins,
+                'iterativeWins',
+                iterativeWins,
+                'recursiveWins',
+                recursiveWins,
+                'stackingWins',
+                stackingWins,
+            );
         });
 
         it('calculate average time', () => {
             let simpleTime = 0;
             let iterativeTime = 0;
+            let stackingTime = 0;
             const res = Array.from(Array(50).keys(), key => {
                 const sheet = { w: Math.round(Math.random() * 100 + 2), l: Math.round(Math.random() * 100 + 2) };
                 const box = {
@@ -167,10 +289,13 @@ describe('CNC', () => {
                 start = Date.now();
                 cnc.cutV3();
                 iterativeTime += Date.now() - start;
+                start = Date.now();
+                cnc.cutV4();
+                stackingTime += Date.now() - start;
                 return 0;
             });
 
-            console.log('simple', simpleTime, 'iterative', iterativeTime);
+            console.log('simple', simpleTime, 'iterative', iterativeTime, 'stackingTime', stackingTime);
         });
     });
 });

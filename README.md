@@ -34,23 +34,58 @@ npm test
 
 ## Description
 
+During development there were implemented 4 algorithms.
+
+#### V1
 The first logic that has been implemented in `CNC.cutV1` was with the simple thought in mind that nesting pattern of the one box has at most the size of its biggest sizes.
 So the single form can be just located one by one.
 
-After determining the location it can be easily transferred to the commands.
+After determining the location it could be easily transferred to the commands.
 
-The next step for the algorithm is backtracking algorithm implemented in the `CNC.cutV2` method.
+#### V2
+
+Since the boxes weren't close enough in the previous algorithm, I decided to iterate overall rotation combinations in each possible location.
+
+V2 is backtracking algorithm that was improved by memoization.
 It tries to fit the box in the specified place. If it fits, calculate the further number of box that can be cutted.
 This number can be compared when we try to move this box a bit.
 
 The one more advantage for this approach is that it is scalable for the number of the possible forms we can accept, the list can be extended later.
 
-Since this algorithm may be consuming I suggest the way optimization in the step of the backtracking algorithm - the minimum size of the sides of the box.
+#### V3
+
+The previous algorithm turned out to be really consuming and despite the stop point using time it may occur off the timeout period.
+
+V3 used all 4 rotations but tried to find only one possible place for the new box.
+
+And also it uses iterative approach which allows us to stop in time.
+
+In V3 and V2 was used the logic of determining if the current box conflits with previous located box. And since each form is a list of coordinates and each box can be divided on rectangles, so the algorithm checks if the rectangles from two boxes are intersected.
+
+#### V4 
+
+The previous solution is still under perform for the large sheet size.
+
+So to balance precision and performance, we could use the first approach and just stick the boxes together in one direction.
+
+In order to count two possible orientations of the sheet, we have two orientations of boxes rows.
+
+### Conclusion
+
+V3 has the best precision in a reasonable time and can be used for cases when we have more than 10 seconds or for small sheets.
+
+The advantage of V3 is that it may be extended with different unique forms.
+
+V4 has been selected since we are expecting high load.
+
+There is also a test where these 4 algorithms are compared by the resulting boxes and time consumed.
+
+### Further improvements
 
 The further improvement may include:
 - more tests
 - additional forms
-- optimization of algorithm's loops
+- optimization of V3 algorithm's step to the greatest common divisor
 
 ## API
 

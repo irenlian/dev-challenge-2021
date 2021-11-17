@@ -4,7 +4,7 @@ import Location = Models.Location;
 export type Form = (b: BoxSize, startPoint: Location) => Location[];
 
 // startPoint left bottom point of the rectangular of box
-const getHorizontalLeftForm: Form = ({ h, d, w }, startPoint) =>
+export const getHorizontalLeftForm: Form = ({ h, d, w }, startPoint) =>
     [
         { x: h, y: h },
         { x: 0, y: h },
@@ -21,7 +21,7 @@ const getHorizontalLeftForm: Form = ({ h, d, w }, startPoint) =>
         { x: h, y: h },
     ].map(p => ({ x: p.x + startPoint.x, y: p.y + startPoint.y }));
 
-const getHorizontalRightForm: Form = ({ h, d, w }, startPoint) =>
+export const getHorizontalRightForm: Form = ({ h, d, w }, startPoint) =>
     [
         { x: 2 * w + h, y: h },
         { x: 2 * w + 2 * h, y: h },
@@ -38,4 +38,37 @@ const getHorizontalRightForm: Form = ({ h, d, w }, startPoint) =>
         { x: 2 * w + h, y: h },
     ].map(p => ({ x: p.x + startPoint.x, y: p.y + startPoint.y }));
 
-export const FORMS: Form[] = [getHorizontalLeftForm, getHorizontalRightForm];
+export const getVerticalTopForm: Form = ({ h, d, w }, startPoint) =>
+    [
+        { x: h, y: 2 * w + h },
+        { x: h, y: 2 * w + 2 * h },
+        { x: h + d, y: 2 * w + 2 * h },
+        { x: h + d, y: 2 * w + h },
+        { x: 2 * h + d, y: 2 * w + h },
+        { x: 2 * h + d, y: w + h },
+        { x: h + d, y: w + h },
+        { x: h + d, y: 0 },
+        { x: h, y: 0 },
+        { x: h, y: w + h },
+        { x: 0, y: w + h },
+        { x: 0, y: 2 * w + h },
+    ].map(p => ({ x: p.x + startPoint.x, y: p.y + startPoint.y }));
+
+export const getVerticalBottomForm: Form = ({ h, d, w }, startPoint) =>
+    [
+        { x: h + d, y: h },
+        { x: h + d, y: 0 },
+        { x: h, y: 0 },
+        { x: h, y: h },
+        { x: 0, y: h },
+        { x: 0, y: h + w },
+        { x: h, y: h + w },
+        { x: h, y: 2 * h + 2 * w },
+        { x: h + d, y: 2 * h + 2 * w },
+        { x: h + d, y: h + w },
+        { x: 2 * h + d, y: h + w },
+        { x: 2 * h + d, y: h },
+        { x: h + d, y: h },
+    ].map(p => ({ x: p.x + startPoint.x, y: p.y + startPoint.y }));
+
+export const FORMS: Form[] = [getHorizontalLeftForm, getHorizontalRightForm, getVerticalTopForm, getVerticalBottomForm];
