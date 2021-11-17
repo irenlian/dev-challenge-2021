@@ -79,6 +79,7 @@ The advantage of V3 is that it may be extended with different unique forms.
 V4 has been selected since we are expecting high load.
 
 There is also a test where these 4 algorithms are compared by the resulting boxes and time consumed.
+In order to run this test you need to remove `.skip` for `Effectiveness comparison` suite  and adjust `TESTS_NUMBER` before running tests.
 
 ### Further improvements
 
@@ -112,15 +113,15 @@ Response example:
 ```
 {
     "success": true,
-    "amount": 1,
+    "amount": 3,
     "program": [
         {
             "command": "START"
         },
         {
             "command": "GOTO",
-            "x": 0,
-            "y": 200
+            "x": 200,
+            "y": 600
         },
         {
             "command": "DOWN"
@@ -128,31 +129,26 @@ Response example:
         {
             "command": "GOTO",
             "x": 200,
-            "y": 200
-        },
-        {
-            "command": "GOTO",
-            "x": 200,
-            "y": 0
+            "y": 800
         },
         {
             "command": "GOTO",
             "x": 400,
-            "y": 0
+            "y": 800
         },
         {
             "command": "GOTO",
             "x": 400,
-            "y": 200
+            "y": 600
         },
         {
             "command": "GOTO",
-            "x": 800,
-            "y": 200
+            "x": 600,
+            "y": 600
         },
         {
             "command": "GOTO",
-            "x": 800,
+            "x": 600,
             "y": 400
         },
         {
@@ -163,12 +159,18 @@ Response example:
         {
             "command": "GOTO",
             "x": 400,
-            "y": 600
+            "y": 0
+        },
+        {
+            "command": "UP"
         },
         {
             "command": "GOTO",
             "x": 200,
-            "y": 600
+            "y": 0
+        },
+        {
+            "command": "DOWN"
         },
         {
             "command": "GOTO",
@@ -181,9 +183,174 @@ Response example:
             "y": 400
         },
         {
+            "command": "UP"
+        },
+        {
             "command": "GOTO",
             "x": 0,
+            "y": 600
+        },
+        {
+            "command": "DOWN"
+        },
+        {
+            "command": "GOTO",
+            "x": 200,
+            "y": 600
+        },
+        {
+            "command": "UP"
+        },
+        {
+            "command": "GOTO",
+            "x": 800,
             "y": 200
+        },
+        {
+            "command": "DOWN"
+        },
+        {
+            "command": "GOTO",
+            "x": 800,
+            "y": 0
+        },
+        {
+            "command": "UP"
+        },
+        {
+            "command": "GOTO",
+            "x": 600,
+            "y": 0
+        },
+        {
+            "command": "DOWN"
+        },
+        {
+            "command": "GOTO",
+            "x": 600,
+            "y": 200
+        },
+        {
+            "command": "GOTO",
+            "x": 400,
+            "y": 200
+        },
+        {
+            "command": "GOTO",
+            "x": 400,
+            "y": 400
+        },
+        {
+            "command": "GOTO",
+            "x": 600,
+            "y": 400
+        },
+        {
+            "command": "GOTO",
+            "x": 600,
+            "y": 800
+        },
+        {
+            "command": "GOTO",
+            "x": 800,
+            "y": 800
+        },
+        {
+            "command": "GOTO",
+            "x": 800,
+            "y": 400
+        },
+        {
+            "command": "GOTO",
+            "x": 1000,
+            "y": 400
+        },
+        {
+            "command": "GOTO",
+            "x": 1000,
+            "y": 200
+        },
+        {
+            "command": "GOTO",
+            "x": 800,
+            "y": 200
+        },
+        {
+            "command": "UP"
+        },
+        {
+            "command": "GOTO",
+            "x": 1000,
+            "y": 600
+        },
+        {
+            "command": "DOWN"
+        },
+        {
+            "command": "GOTO",
+            "x": 1000,
+            "y": 800
+        },
+        {
+            "command": "GOTO",
+            "x": 1200,
+            "y": 800
+        },
+        {
+            "command": "GOTO",
+            "x": 1200,
+            "y": 600
+        },
+        {
+            "command": "GOTO",
+            "x": 1400,
+            "y": 600
+        },
+        {
+            "command": "GOTO",
+            "x": 1400,
+            "y": 400
+        },
+        {
+            "command": "GOTO",
+            "x": 1200,
+            "y": 400
+        },
+        {
+            "command": "GOTO",
+            "x": 1200,
+            "y": 0
+        },
+        {
+            "command": "UP"
+        },
+        {
+            "command": "GOTO",
+            "x": 1000,
+            "y": 0
+        },
+        {
+            "command": "DOWN"
+        },
+        {
+            "command": "GOTO",
+            "x": 1000,
+            "y": 400
+        },
+        {
+            "command": "GOTO",
+            "x": 800,
+            "y": 400
+        },
+        {
+            "command": "GOTO",
+            "x": 800,
+            "y": 600
+        },
+        {
+            "command": "GOTO",
+            "x": 1000,
+            "y": 600
         },
         {
             "command": "UP"

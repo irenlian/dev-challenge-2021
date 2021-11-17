@@ -1,26 +1,18 @@
 import get from 'lodash/get';
-import { CommandType } from './types';
-
-import Sheet = Models.Sheet;
-import BoxSize = Models.BoxSize;
-import Location = Models.Location;
-import Command = Models.Command;
+import { CommandType, Memo, Option } from './types';
 import {
-    Form,
     FORMS,
     getHorizontalLeftForm,
     getHorizontalRightForm,
     getVerticalBottomForm,
     getVerticalTopForm,
 } from './form';
-import { isBoxOverlapped, push } from '../utils';
+import { isBoxOverlapped, isEdge, push } from '../utils';
 
-type Memo = Record<number, Record<number, Record<number, Location[][]>>>;
-
-type Option = {
-    locatedBoxes: Location[][];
-    form: Form;
-};
+import Sheet = Models.Sheet;
+import BoxSize = Models.BoxSize;
+import Location = Models.Location;
+import Command = Models.Command;
 
 export default class CNC {
     sheet: Sheet;
@@ -170,7 +162,7 @@ export default class CNC {
         const commands: Command[] = [{ command: CommandType.START }];
 
         points.forEach(boxLocation => {
-            commands.push(...this.convertOnePointToCommand(boxLocation));
+            commands.push(...this.convertOneBoxToCommand(boxLocation));
         });
 
         commands.push({
@@ -180,13 +172,26 @@ export default class CNC {
         return commands;
     };
 
-    private convertOnePointToCommand = (dots: Location[]): Command[] => {
+    private convertOneBoxToCommand = (dots: Location[]): Command[] => {
         const COMMAND = { command: CommandType.GOTO };
         const commands: Command[] = [{ ...COMMAND, ...dots[0] }, { command: CommandType.DOWN }];
+        let isCutting = true;
 
         dots.forEach((d, i) => {
             if (i === 0) return;
-            commands.push({ ...COMMAND, ...d });
+            if (isEdge(d, this.sheet)) {
+                if (isCutting) {
+                    commands.push({ ...COMMAND, ...d });
+                    commands.push({ command: CommandType.UP });
+                    isCutting = false;
+                } else {
+                    commands.push({ ...COMMAND, ...d });
+                    commands.push({ command: CommandType.DOWN });
+                    isCutting = true;
+                }
+            } else {
+                commands.push({ ...COMMAND, ...d });
+            }
         });
 
         commands.push({

@@ -14,24 +14,61 @@ describe('CNC', () => {
     describe('convertToCommands', () => {
         it('returns start and end commands', () => {
             const cnc = new CNC({ w: 800, l: 600 }, { w: 200, d: 200, h: 200 });
-            const result = cnc.convertToCommands(cnc.cutV2());
+            const result = cnc.convertToCommands(cnc.cutV4());
             expect(result.filter(c => c.command === 'START')).toHaveLength(1);
             expect(result.filter(c => c.command === 'STOP')).toHaveLength(1);
-            expect(result.filter(c => c.command === 'DOWN')).toHaveLength(1);
         });
 
         it('includes x and y only for GOTO', () => {
             const cnc = new CNC({ w: 1500, l: 1000 }, { w: 200, d: 200, h: 200 });
-            const result = cnc.convertToCommands(cnc.cutV2());
+            const result = cnc.convertToCommands(cnc.cutV4());
             expect(result.find(c => c.command !== 'GOTO' && (c.x || c.y))).not.toBeDefined();
+        });
+
+        it('number of GOTO commands reflect the number of points', () => {
+            const cnc = new CNC({ w: 1500, l: 1000 }, { w: 200, d: 200, h: 200 });
+            const boxes = cnc.cutV4();
+            const result = cnc.convertToCommands(boxes);
+            expect(result.filter(c => c.command === 'GOTO')).toHaveLength(13 * boxes.length);
+        });
+
+        it('check the exact commands', () => {
+            const cnc = new CNC({ w: 800, l: 600 }, { w: 200, d: 200, h: 200 });
+            const result = cnc.convertToCommands(cnc.cutV4());
+            expect(result).toEqual([
+                { command: 'START' },
+                { command: 'GOTO', x: 200, y: 200 },
+                { command: 'DOWN' },
+                { command: 'GOTO', x: 0, y: 200 },
+                { command: 'UP' },
+                { command: 'GOTO', x: 0, y: 400 },
+                { command: 'DOWN' },
+                { command: 'GOTO', x: 200, y: 400 },
+                { command: 'GOTO', x: 200, y: 600 },
+                { command: 'UP' },
+                { command: 'GOTO', x: 400, y: 600 },
+                { command: 'DOWN' },
+                { command: 'GOTO', x: 400, y: 400 },
+                { command: 'GOTO', x: 800, y: 400 },
+                { command: 'UP' },
+                { command: 'GOTO', x: 800, y: 200 },
+                { command: 'DOWN' },
+                { command: 'GOTO', x: 400, y: 200 },
+                { command: 'GOTO', x: 400, y: 0 },
+                { command: 'UP' },
+                { command: 'GOTO', x: 200, y: 0 },
+                { command: 'DOWN' },
+                { command: 'GOTO', x: 200, y: 200 },
+                { command: 'UP' },
+                { command: 'STOP' },
+            ]);
         });
     });
 
-    describe('Iterative V3', () => {
+    describe.skip('Iterative V3', () => {
         it('check the smallest input', () => {
             const cnc = new CNC({ w: 600, l: 400 }, { w: 100, d: 100, h: 100 });
             const result = cnc.cutV3();
-            console.log(result);
             expect(result).toEqual([
                 [
                     { x: 100, y: 100 },
@@ -106,14 +143,12 @@ describe('CNC', () => {
         it('check', () => {
             const cnc = new CNC({ w: 36, l: 22 }, { w: 7, d: 2, h: 7 });
             const result = cnc.cutV3(); // 1 box, waste 0.8
-            console.log(result);
             expect(result).toHaveLength(1);
         });
 
         it('check', () => {
             const cnc = new CNC({ w: 50, l: 47 }, { w: 7, d: 5, h: 8 });
             const result = cnc.cutV3(); // 4 box, 0.74
-            console.log(result);
             expect(result).toHaveLength(4);
         });
     });
@@ -135,8 +170,9 @@ describe('CNC', () => {
                     { x: 100, y: 0 },
                     { x: 100, y: 200 },
                     { x: 0, y: 200 },
-                    { x: 0, y: 300 }
-                ]
+                    { x: 0, y: 300 },
+                    { x: 100, y: 300 },
+                ],
             ]);
         });
 
@@ -157,7 +193,7 @@ describe('CNC', () => {
                     { x: 200, y: 100 },
                     { x: 200, y: 0 },
                     { x: 100, y: 0 },
-                    { x: 100, y: 100 }
+                    { x: 100, y: 100 },
                 ],
                 [
                     { x: 300, y: 300 },
@@ -172,8 +208,8 @@ describe('CNC', () => {
                     { x: 200, y: 300 },
                     { x: 200, y: 200 },
                     { x: 300, y: 200 },
-                    { x: 300, y: 300 }
-                ]
+                    { x: 300, y: 300 },
+                ],
             ]);
         });
 
@@ -183,21 +219,34 @@ describe('CNC', () => {
             expect(result).toHaveLength(3);
             expect(result).toEqual([
                 [
-                    { x: 2, y: 6 }, { x: 2, y: 8 },
-                    { x: 6, y: 8 }, { x: 6, y: 6 },
-                    { x: 8, y: 6 }, { x: 8, y: 4 },
-                    { x: 6, y: 4 }, { x: 6, y: 0 },
-                    { x: 2, y: 0 }, { x: 2, y: 4 },
-                    { x: 0, y: 4 }, { x: 0, y: 6 }
+                    { x: 2, y: 6 },
+                    { x: 2, y: 8 },
+                    { x: 6, y: 8 },
+                    { x: 6, y: 6 },
+                    { x: 8, y: 6 },
+                    { x: 8, y: 4 },
+                    { x: 6, y: 4 },
+                    { x: 6, y: 0 },
+                    { x: 2, y: 0 },
+                    { x: 2, y: 4 },
+                    { x: 0, y: 4 },
+                    { x: 0, y: 6 },
+                    { x: 2, y: 6 },
                 ],
                 [
-                    { x: 12, y: 2 }, { x: 12, y: 0 },
-                    { x: 8, y: 0 },  { x: 8, y: 2 },
-                    { x: 6, y: 2 },  { x: 6, y: 4 },
-                    { x: 8, y: 4 },  { x: 8, y: 8 },
-                    { x: 12, y: 8 }, { x: 12, y: 4 },
-                    { x: 14, y: 4 }, { x: 14, y: 2 },
-                    { x: 12, y: 2 }
+                    { x: 12, y: 2 },
+                    { x: 12, y: 0 },
+                    { x: 8, y: 0 },
+                    { x: 8, y: 2 },
+                    { x: 6, y: 2 },
+                    { x: 6, y: 4 },
+                    { x: 8, y: 4 },
+                    { x: 8, y: 8 },
+                    { x: 12, y: 8 },
+                    { x: 12, y: 4 },
+                    { x: 14, y: 4 },
+                    { x: 14, y: 2 },
+                    { x: 12, y: 2 },
                 ],
                 [
                     { x: 14, y: 6 },
@@ -211,20 +260,22 @@ describe('CNC', () => {
                     { x: 14, y: 0 },
                     { x: 14, y: 4 },
                     { x: 12, y: 4 },
-                    { x: 12, y: 6 }
-                ]
+                    { x: 12, y: 6 },
+                    { x: 14, y: 6 },
+                ],
             ]);
         });
     });
 
-    describe('Effectiveness comparison', () => {
+    describe.skip('Effectiveness comparison', () => {
+        const TESTS_NUMBER = 10;
         it('calculate average waste', () => {
             let combineBoxesSimpleWaste = [] as number[];
             let simpleWins = 0;
             let recursiveWins = 0;
             let iterativeWins = 0;
             let stackingWins = 0;
-            const res = Array.from(Array(10).keys(), key => {
+            const res = Array.from(Array(TESTS_NUMBER).keys(), key => {
                 const sheet = { w: Math.round(Math.random() * 100 + 2), l: Math.round(Math.random() * 100 + 2) };
                 const box = {
                     w: Math.round(Math.random() * 10 + 1),
@@ -235,12 +286,7 @@ describe('CNC', () => {
                 const sheetSquare = sheet.w * sheet.l;
                 const boxSquare = 2 * box.w * box.d + 2 * box.w * box.h + 2 * box.d * box.h;
                 const cnc = new CNC(sheet, box);
-                const boxes = [
-                    cnc.cutV1().length,
-                    cnc.cutV3().length,
-                    cnc.cutV2().length,
-                    cnc.cutV4().length
-                ];
+                const boxes = [cnc.cutV1().length, cnc.cutV3().length, cnc.cutV2().length, cnc.cutV4().length];
                 const w1 = 1 - (boxSquare * boxes[1]) / sheetSquare;
                 const w2 = 1 - (boxSquare * boxes[0]) / sheetSquare;
                 console.log('waste:', w1, w2, 'boxes:', boxes, 'sheetSquare:', sheetSquare);
@@ -274,7 +320,7 @@ describe('CNC', () => {
             let simpleTime = 0;
             let iterativeTime = 0;
             let stackingTime = 0;
-            const res = Array.from(Array(50).keys(), key => {
+            const res = Array.from(Array(TESTS_NUMBER).keys(), key => {
                 const sheet = { w: Math.round(Math.random() * 100 + 2), l: Math.round(Math.random() * 100 + 2) };
                 const box = {
                     w: Math.round(Math.random() * 10 + 1),

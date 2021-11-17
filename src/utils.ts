@@ -82,3 +82,5 @@ export const push = (obj: any, path: (number | string)[], item: any) => {
         set(obj, path[0], item);
     }
 }
+
+export const isEdge = (d: Location, sheet: Models.Sheet) => d.x === 0 || d.y === 0 || d.x === sheet.w || d.y === sheet.l;

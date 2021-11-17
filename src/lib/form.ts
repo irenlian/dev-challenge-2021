@@ -1,7 +1,4 @@
-import BoxSize = Models.BoxSize;
-import Location = Models.Location;
-
-export type Form = (b: BoxSize, startPoint: Location) => Location[];
+import { Form } from './types';
 
 // startPoint left bottom point of the rectangular of box
 export const getHorizontalLeftForm: Form = ({ h, d, w }, startPoint) =>
@@ -52,6 +49,7 @@ export const getVerticalTopForm: Form = ({ h, d, w }, startPoint) =>
         { x: h, y: w + h },
         { x: 0, y: w + h },
         { x: 0, y: 2 * w + h },
+        { x: h, y: 2 * w + h },
     ].map(p => ({ x: p.x + startPoint.x, y: p.y + startPoint.y }));
 
 export const getVerticalBottomForm: Form = ({ h, d, w }, startPoint) =>
