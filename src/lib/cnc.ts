@@ -5,10 +5,15 @@ import Sheet = Models.Sheet;
 import BoxSize = Models.BoxSize;
 import Location = Models.Location;
 import Command = Models.Command;
-import { FORMS } from './form';
+import { Form, FORMS } from './form';
 import { isBoxOverlapped, push } from '../utils';
 
 type Memo = Record<number, Record<number, Record<number, Location[][]>>>
+
+type Option = {
+    locatedBoxes: Location[][];
+    form: Form;
+}
 
 export default class CNC {
     sheet: Sheet;
@@ -38,7 +43,8 @@ export default class CNC {
         return this.sheet.l >= y && this.sheet.w >= x;
     };
 
-    combineBoxes = (): Location[] => {
+    // Simple algorithm that uses a single form which stands one by one
+    cutV1 = (): Location[] => {
         const x = this.boxLength;
         const y = this.boxHeight;
         const columns = Array.from(Array(Math.floor(this.sheet.w / x)).keys(), key => key * x);
@@ -51,8 +57,8 @@ export default class CNC {
         return this.points;
     };
 
-    // Backtracking algorithm to determine the better combination of boxes
-    bestLocatedBoxes = (locatedBoxes = [] as Location[][], startX = 0, startY = 0): Location[][] => {
+    // Backtracking recursive algorithm with memoization to determine the better combination of boxes
+    cutV2 = (locatedBoxes = [] as Location[][], startX = 0, startY = 0): Location[][] => {
         let bestLocation: Location[][] = [];
         const start = Date.now();
         const smallestStep = Math.min(this.box.d, this.box.h, this.box.w);
@@ -66,7 +72,7 @@ export default class CNC {
                     // check if it not overlaps with previous boxes
                     if (!isBoxOverlapped(locatedBoxes, box)) {
                         // calculate how many boxes can we put later
-                        const result = get(this.memo, [i, j, k], this.bestLocatedBoxes([...locatedBoxes, box], i, j));
+                        const result = get(this.memo, [i, j, k], this.cutV2([...locatedBoxes, box], i, j));
                         push(this.memo, [i, j, k], result);
                         // if more boxes fits, so select this solution
                         if (result.length + 1 > bestLocation.length) bestLocation = [box, ...result];
@@ -78,6 +84,35 @@ export default class CNC {
                     }
                 }
             }
+        }
+        return bestLocation;
+    }
+
+    // Backtracking iterative algorithm with just a single try to locate a specific form
+    cutV3 = (): Location[][] => {
+        const start = Date.now();
+        const smallestStep = 1;
+        let bestLocation: Location[][] = [];
+        const queue: Option[] = FORMS.map(f => ({ form: f, locatedBoxes: [] as Location[][] }));
+        while (queue.length && (Date.now() - start) / 1000 < 9) {
+            const option = queue.shift();
+            if (!option) break;
+            const { form, locatedBoxes } = option;
+            let located = false;
+            for (let i = 0; i <= this.sheet.w - this.boxLength; i += smallestStep) {
+                for (let j = 0; j <= this.sheet.l - this.boxHeight; j += smallestStep) {
+                    const point = { x: i, y: j };
+                    const box = form(this.box, point);
+                    const newCombination = [...locatedBoxes, box];
+                    if (!isBoxOverlapped(locatedBoxes, box)) {
+                        queue.push(...FORMS.map(f => ({ form: f, locatedBoxes: newCombination })));
+                        located = true;
+                        break;
+                    }
+                }
+                if (located) break;
+            }
+            if (locatedBoxes.length > bestLocation.length) bestLocation = locatedBoxes;
         }
         return bestLocation;
     }

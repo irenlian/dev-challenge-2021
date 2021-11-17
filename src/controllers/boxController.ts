@@ -17,7 +17,7 @@ export const simpleBoxController = async (ctx: Koa.Context) => {
         );
     }
 
-    const boxes: Models.Location[][] = cnc.bestLocatedBoxes();
+    const boxes: Models.Location[][] = cnc.cutV2();
     const commands: Models.Command[] = cnc.convertToCommands(boxes);
 
     ctx.status = 200;

@@ -34,12 +34,12 @@ npm test
 
 ## Description
 
-The first logic that has been implemented in `CNC.combineBoxes` was with the simple thought in mind that nesting pattern of the one box has at most the size of its biggest sizes.
+The first logic that has been implemented in `CNC.cutV1` was with the simple thought in mind that nesting pattern of the one box has at most the size of its biggest sizes.
 So the single form can be just located one by one.
 
 After determining the location it can be easily transferred to the commands.
 
-The next step for the algorithm is backtracking algorithm implemented in the `CNC.bestLocatedBoxes` method.
+The next step for the algorithm is backtracking algorithm implemented in the `CNC.cutV2` method.
 It tries to fit the box in the specified place. If it fits, calculate the further number of box that can be cutted.
 This number can be compared when we try to move this box a bit.
 
