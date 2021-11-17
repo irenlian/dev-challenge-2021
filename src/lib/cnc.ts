@@ -1,3 +1,4 @@
+import get from 'lodash/get';
 import { CommandType } from './types';
 
 import Sheet = Models.Sheet;
@@ -5,7 +6,9 @@ import BoxSize = Models.BoxSize;
 import Location = Models.Location;
 import Command = Models.Command;
 import { FORMS } from './form';
-import { isBoxOverlapped } from '../utils';
+import { isBoxOverlapped, push } from '../utils';
+
+type Memo = Record<number, Record<number, Record<number, Location[][]>>>
 
 export default class CNC {
     sheet: Sheet;
@@ -13,6 +16,7 @@ export default class CNC {
     points: Location[];
     boxLength: number;
     boxHeight: number;
+    memo: Memo;
 
     constructor(paper: Sheet, box: BoxSize) {
         this.sheet = paper;
@@ -21,6 +25,7 @@ export default class CNC {
         // Calculate the dimensions of the rectangle that could fit the box
         this.boxLength = 2 * this.box.h + 2 * this.box.w;
         this.boxHeight = 2 * this.box.h + this.box.d;
+        this.memo = {};
     }
 
     canBeUsed = (): boolean => {
@@ -47,22 +52,29 @@ export default class CNC {
     };
 
     // Backtracking algorithm to determine the better combination of boxes
-    bestLocatedBoxes = (locatedBoxes = [] as Location[][]): Location[][] => {
+    bestLocatedBoxes = (locatedBoxes = [] as Location[][], startX = 0, startY = 0): Location[][] => {
         let bestLocation: Location[][] = [];
-        // const form = FORMS[0];
+        const start = Date.now();
         const smallestStep = Math.min(this.box.d, this.box.h, this.box.w);
-        for (const form of FORMS) {
-            for (let i = 0; i <= this.sheet.w - this.boxLength; i += smallestStep) {
-                for (let j = 0; j <= this.sheet.l - this.boxHeight; j += smallestStep) {
+        for (let k = 0; k < FORMS.length; k ++) {
+            const form = FORMS[k];
+            for (let i = startX; i <= this.sheet.w - this.boxLength; i += smallestStep) {
+                for (let j = startY; j <= this.sheet.l - this.boxHeight; j += smallestStep) {
                     // check the new location for box
                     const point = { x: i, y: j };
                     const box = form(this.box, point);
                     // check if it not overlaps with previous boxes
                     if (!isBoxOverlapped(locatedBoxes, box)) {
                         // calculate how many boxes can we put later
-                        const result = this.bestLocatedBoxes([...locatedBoxes, box]);
+                        const result = get(this.memo, [i, j, k], this.bestLocatedBoxes([...locatedBoxes, box], i, j));
+                        push(this.memo, [i, j, k], result);
                         // if more boxes fits, so select this solution
                         if (result.length + 1 > bestLocation.length) bestLocation = [box, ...result];
+                    }
+                    // Stop long iteration
+                    const end = Date.now();
+                    if ((end - start) / 1000 > 8) {
+                        return bestLocation;
                     }
                 }
             }
@@ -70,7 +82,7 @@ export default class CNC {
         return bestLocation;
     }
 
-    convertToCommands = (points: Location[]): Command[] => {
+    convertToCommands = (points: Location[][]): Command[] => {
         const commands: Command[] = [{ command: CommandType.START }];
 
         points.forEach(boxLocation => {
@@ -84,33 +96,16 @@ export default class CNC {
         return commands;
     };
 
-    private convertOnePointToCommand = ({ x, y }: Location): Command[] => {
+    private convertOnePointToCommand = (dots: Location[]): Command[] => {
         const COMMAND = { command: CommandType.GOTO };
-        const currentPoint: Location = { x, y: y + this.box.h };
         const commands: Command[] = [
-            { ...COMMAND, ...currentPoint },
+            { ...COMMAND, ...dots[0] },
             { command: CommandType.DOWN },
         ];
 
-        const form = [
-            { x: this.box.h, y: 0 },
-            { x: 0, y: -this.box.h },
-            { x: this.box.w, y: 0 },
-            { x: 0, y: this.box.h },
-            { x: this.box.h + this.box.w, y: 0 },
-            { x: 0, y: this.box.d },
-            { x: -(this.box.h + this.box.w), y: 0 },
-            { x: 0, y: this.box.h },
-            { x: -this.box.w, y: 0 },
-            { x: 0, y: -this.box.h },
-            { x: -this.box.h, y: 0 },
-            { x: 0, y: -this.box.d },
-        ];
-
-        form.forEach(change => {
-            currentPoint.x += change.x;
-            currentPoint.y += change.y;
-            commands.push({ ...COMMAND, ...currentPoint });
+        dots.forEach((d, i) => {
+            if (i === 0) return;
+            commands.push({ ...COMMAND, ...d });
         });
 
         commands.push({

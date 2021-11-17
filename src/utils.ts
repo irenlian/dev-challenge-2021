@@ -1,3 +1,7 @@
+import has from 'lodash/has';
+import set from 'lodash/set';
+import get from 'lodash/get';
+
 import Location = Models.Location;
 
 // top-left, top-right, bottom-right, bottom-left
@@ -65,4 +69,16 @@ export const isBoxOverlapped = (boxes: Location[][], newBox: Location[]): boolea
         }
     }
     return false;
+}
+
+export const push = (obj: any, path: (number | string)[], item: any) => {
+    if (!path.length) return;
+    if (has(obj, path[0])) {
+        push(get(obj, path[0]), path.slice(1), item);
+    } else if (path.length > 1) {
+        set(obj, path[0], {});
+        push(get(obj, path[0]), path.slice(1), item);
+    } else {
+        set(obj, path[0], item);
+    }
 }
