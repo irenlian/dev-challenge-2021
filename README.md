@@ -3,6 +3,8 @@ Backend task for devchallenge.it in 2021
 
 This is the service for composing the list of the commands for CNC.
 
+The next round of the challenge please see here: https://github.com/irenlian/dev-challenge-2021-final
+
 ## Task
 
 Your customer makes cardboard boxes from sheets of cardboard to pack different things there. You need to make a WebAPI service that will help him cut from the whole sheet - he will set the size of the sheet and the size of the desired box, and your service will give him a CNC program that will cut the maximum number of boxes with a minimum amount of waste.
